@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.container').appendChild(requireLogin);
   }
 
-  document.getElementById('change-id-form').addEventListener('submit', async function (event) {
+  document.getElementById('change-id-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const userId = document.getElementById('id').value;
     fetch('/change-id', {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     location.reload(true);
   });
 
-  document.getElementById('change-language-form').addEventListener('submit', async function (event) {
+  document.getElementById('change-language-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const language = document.getElementById('language').value;
     await fetch('/change-language', {

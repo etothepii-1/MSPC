@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById(initLanguage).selected = true;
       let editor;
       require.config({ paths: { vs: 'https://unpkg.com/monaco-editor/min/vs' } });
-      require(['vs/editor/editor.main'], function () {
+      require(['vs/editor/editor.main'], () => {
         const initCode = sessionStorage.getItem('code');
         editor = monaco.editor.create(document.getElementById('editor'), {
           value: initCode,
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         sessionStorage.removeItem('language');
         sessionStorage.removeItem('init-language');
 
-        document.getElementById('language').addEventListener('change', function (event) {
+        document.getElementById('language').addEventListener('change', (event) => {
           let language = event.target.value;
           if (language == 49) language = 'c';
           else if (language === '53') language = 'cpp';
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           monaco.editor.setModelLanguage(editor.getModel(), language);
         });
 
-        document.getElementById('submit-form').addEventListener('submit', async function (event) {
+        document.getElementById('submit-form').addEventListener('submit', async (event) => {
           event.preventDefault();
           if (editor.getValue() !== '') {
             const modalElement = document.getElementById('result-modal');
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
 
-      document.getElementById('close-button').addEventListener('click', function () {
+      document.getElementById('close-button').addEventListener('click', () => {
         const code = editor.getValue();
         const language = document.getElementById('language').value;
         sessionStorage.setItem('code', code);
