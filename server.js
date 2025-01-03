@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -10,6 +11,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 100 * 365 * 24 * 60 * 60 * 1000 },
+  })
+);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
@@ -27,7 +37,7 @@ const userSchema = new mongoose.Schema({
   score_update: Date,
   problem_score: Map,
   language: String,
-  position: String,
+  role: String,
 });
 const User = mongoose.model('User', userSchema);
 
@@ -35,7 +45,7 @@ app.post('/user-register', async (req, res) => {
   try {
     const userName = req.body.user_name;
     const userSub = req.body.user_sub;
-    const user = await User.findOne({ sub: userSub });
+    let user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     if (!user) {
       const newUser = new User({
         name: userName,
@@ -45,24 +55,37 @@ app.post('/user-register', async (req, res) => {
         score_update: new Date(),
         problem_score: {},
         language: 'c',
-        position: '',
+        role: '',
       });
       await newUser.save();
-      res.json({ id: userName });
-    } else {
-      res.json(user);
+      user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     }
+    req.session.userData = user;
+    res.json(req.session.userData);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-app.post('/get-user', async (req, res) => {
+app.get('/get-user', async (req, res) => {
   try {
-    const userSub = req.body.user_sub;
-    const user = await User.findOne({ sub: userSub });
-    res.json(user);
+    res.json(req.session.userData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/logout', (req, res) => {
+  try {
+    req.session.destroy((error) => {
+      if (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+      res.end();
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -175,11 +198,16 @@ const Submission = mongoose.model('Submission', submissionSchema);
 
 app.post('/submit', async (req, res) => {
   try {
-    const { userSub, problemId, language, code } = req.body;
+    const { problemId, language, code } = req.body;
     const problem = await Problem.findOne({ id: problemId });
     const problemScore = problem.score;
-    const user = await User.findOne({ sub: userSub });
-    const userProblemsScore = new Map(user.problem_score);
+    const user = req.session.userData;
+    let userProblemsScore;
+    try {
+      userProblemsScore = new Map(user.problem_score);
+    } catch (error) {
+      userProblemsScore = new Map();
+    }
     const userProblemScore = userProblemsScore.get(problemId) ?? 0;
     const testdata = await Testdata.findOne({ id: problemId });
     const submissions = {
@@ -211,9 +239,7 @@ app.post('/submit', async (req, res) => {
             return { status: { id: 13 } };
           } else if (result.status.id === 1 || result.status.id === 2) {
             await new Promise((resolve) => setTimeout(resolve, 100));
-          } else {
-            break;
-          }
+          } else break;
         }
         return result;
       })
@@ -224,10 +250,11 @@ app.post('/submit', async (req, res) => {
     const currentDate = new Date();
     const endDate = new Date(process.env.END_DATE);
     if (statusId === 3 && scoreIncrease !== 0 && currentDate < endDate) {
-      await User.findOneAndUpdate({ sub: userSub }, { $inc: { total_score: scoreIncrease } }, { new: true });
-      await User.findOneAndUpdate({ sub: userSub }, { $set: { [`problem_score.${problemId}`]: problemScore } }, { new: true });
-      await User.findOneAndUpdate({ sub: userSub }, { score_update: new Date() }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { $inc: { total_score: scoreIncrease } }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { $set: { [`problem_score.${problemId}`]: problemScore } }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { score_update: new Date() }, { new: true });
     }
+    req.session.userData = await User.findOne({ sub: req.session.userData.sub }, { _id: 0, __v: 0 });
     const userName = user.name;
     const submission = new Submission({
       user_name: userName,
@@ -249,15 +276,14 @@ app.get('/leaderboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pages', 'leaderboard.html'));
 });
 
-app.post('/get-all-users', async (req, res) => {
+app.get('/get-all-users', async (req, res) => {
   try {
-    const { userSub } = req.body;
-    const usersWithSub = await User.find({ position: { $ne: 'Admin' } }, {}).sort({
+    const usersWithSub = await User.find({ role: { $ne: 'Admin' } }, {}).sort({
       total_score: -1,
       score_update: 1,
     });
-    const userIndex = usersWithSub.findIndex((user) => user.sub === userSub);
-    const users = await User.find({ position: { $ne: 'Admin' } }, { name: 0, sub: 0, _id: 0 }).sort({
+    const userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
+    const users = await User.find({ role: { $ne: 'Admin' } }, { name: 0, sub: 0, _id: 0 }).sort({
       total_score: -1,
       score_update: 1,
     });
@@ -296,8 +322,9 @@ app.get('/settings', (req, res) => {
 
 app.post('/change-id', async (req, res) => {
   try {
-    const { user_sub, id } = req.body;
-    await User.findOneAndUpdate({ sub: user_sub }, { id }, { new: true });
+    const id = req.body.id;
+    await User.findOneAndUpdate({ sub: req.session.userData.sub }, { id }, { new: true });
+    req.session.userData.id = id;
     res.end();
   } catch (error) {
     console.error(error);
@@ -307,8 +334,9 @@ app.post('/change-id', async (req, res) => {
 
 app.post('/change-language', async (req, res) => {
   try {
-    const { user_sub, language } = req.body;
-    await User.findOneAndUpdate({ sub: user_sub }, { language }, { new: true });
+    const language = req.body.language;
+    await User.findOneAndUpdate({ sub: req.session.userData.sub }, { language }, { new: true });
+    req.session.userData.language = language;
     res.end();
   } catch (error) {
     console.error(error);
@@ -316,8 +344,8 @@ app.post('/change-language', async (req, res) => {
   }
 });
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
 });
 
 process.on('unhandledRejection', (reason, promise) => {

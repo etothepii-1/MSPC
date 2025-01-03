@@ -40,18 +40,22 @@ async function handleCredentialResponse(response) {
   );
   const userName = payload.name;
   const userSub = payload.sub;
-  userId = await userRegister(userName, userSub);
-  localStorage.setItem('isSignedIn', 'true');
-  localStorage.setItem('userId', userId);
-  localStorage.setItem('userSub', userSub);
+  const userId = await userRegister(userName, userSub);
   updateUI(userId);
   location.reload(true);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   const clientId = await loadGoogleSignIn();
-  if (localStorage.getItem('isSignedIn') === 'true') {
-    const userId = localStorage.getItem('userId');
+  const userDataResponse = await fetch('/get-user');
+  let userData;
+  try {
+    userData = await userDataResponse.json();
+  } catch {
+    userData = undefined;
+  }
+  if (userData) {
+    const userId = userData.id;
     updateUI(userId);
   } else {
     google.accounts.id.initialize({
@@ -70,10 +74,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.g_id_signin').style.display = 'block';
   }
 
-  document.getElementById('logout-btn').onclick = () => {
-    localStorage.removeItem('isSignedIn');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userSub');
+  document.getElementById('logout-btn').onclick = async () => {
+    await fetch('/logout');
     updateUI(null);
     location.reload(true);
   };

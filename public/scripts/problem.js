@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  if (localStorage.getItem('isSignedIn') === 'true') {
+  const userDataResponse = await fetch('/get-user');
+  let userData;
+  try {
+    userData = await userDataResponse.json();
+  } catch {
+    userData = undefined;
+  }
+  if (userData) {
     const url = window.location.href;
     const idMatch = url.match(/\/problems\/(\d+)/);
     const problemId = idMatch[1];
@@ -12,14 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const problemExists = await problemExistsResponse.json();
     if (problemExists.exists) {
-      const userSub = localStorage.getItem('userSub');
-      const userResponse = await fetch('/get-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_sub: userSub }),
-      });
+      const userResponse = await fetch('/get-user');
       const user = await userResponse.json();
       const problemResponse = await fetch('/get-problem', {
         method: 'POST',
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
       let initLanguage = user.language;
-      if (localStorage.getItem('init-language') === 'true') initLanguage = localStorage.getItem('language');
+      if (sessionStorage.getItem('init-language') === 'true') initLanguage = sessionStorage.getItem('language');
       if (initLanguage == 49) initLanguage = 'c';
       else if (initLanguage === '53') initLanguage = 'cpp';
       else if (initLanguage === '71') initLanguage = 'python';
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       let editor;
       require.config({ paths: { vs: 'https://unpkg.com/monaco-editor/min/vs' } });
       require(['vs/editor/editor.main'], function () {
-        const initCode = localStorage.getItem('code');
+        const initCode = sessionStorage.getItem('code');
         editor = monaco.editor.create(document.getElementById('editor'), {
           value: initCode,
           language: initLanguage,
@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             enabled: false,
           },
         });
-        localStorage.removeItem('code');
-        localStorage.removeItem('language');
-        localStorage.removeItem('init-language');
+        sessionStorage.removeItem('code');
+        sessionStorage.removeItem('language');
+        sessionStorage.removeItem('init-language');
 
         document.getElementById('language').addEventListener('change', function (event) {
           let language = event.target.value;
@@ -138,7 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const modalElement = document.getElementById('result-modal');
             const modalInstance = new bootstrap.Modal(modalElement);
             modalInstance.show();
-            const userSub = localStorage.getItem('userSub');
             const url = window.location.href;
             const idMatch = url.match(/\/problems\/(\d+)/);
             const problemId = idMatch[1];
@@ -147,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/submit', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userSub: userSub, problemId: problemId, language: language, code: code }),
+              body: JSON.stringify({ problemId: problemId, language: language, code: code }),
             });
             const data = await response.json();
             const modalBody = document.getElementById('modalBody');
@@ -178,9 +177,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('close-button').addEventListener('click', function () {
         const code = editor.getValue();
         const language = document.getElementById('language').value;
-        localStorage.setItem('code', code);
-        localStorage.setItem('init-language', true);
-        localStorage.setItem('language', language);
+        sessionStorage.setItem('code', code);
+        sessionStorage.setItem('init-language', true);
+        sessionStorage.setItem('language', language);
         location.reload(true);
 
         function renderMathJax() {

@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const userSub = localStorage.getItem('userSub');
-  const usersResponse = await fetch('/get-all-users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userSub: userSub }),
-  });
+  const usersResponse = await fetch('/get-all-users');
   const usersJson = await usersResponse.json();
   const users = usersJson.users;
   const userIndex = usersJson.user_index;
@@ -15,10 +10,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const th = document.createElement('th');
     th.scope = 'row';
     if (j === userIndex) tr.classList.add('table-active');
-    if (user.position === '') {
+    if (user.role === '') {
       th.textContent = i + 1;
       i++;
-    } else th.textContent = user.position;
+    } else th.textContent = user.role;
     const tdUserId = document.createElement('td');
     tdUserId.textContent = user.id;
     const tdTotalScore = document.createElement('td');

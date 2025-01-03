@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  if (localStorage.getItem('isSignedIn') === 'true') {
+  const userDataResponse = await fetch('/get-user');
+  let userData;
+  try {
+    userData = await userDataResponse.json();
+  } catch {
+    userData = undefined;
+  }
+  if (userData) {
     const problemResponse = await fetch('/get-all-problems');
     const problems = await problemResponse.json();
     if (problems.started !== false) {
-      const userSub = localStorage.getItem('userSub');
-      const userResponse = await fetch('/get-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_sub: userSub }),
-      });
+      const userResponse = await fetch('/get-user');
       const user = await userResponse.json();
       let totalScore = 0;
       const userProblemScore = new Map(Object.entries(user.problem_score));
