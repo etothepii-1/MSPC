@@ -320,8 +320,8 @@ const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 app.post('/inquiry', async (req, res) => {
   try {
-    const { userName, content } = req.body;
-    const newInquiry = new Inquiry({ userName, content });
+    const { content } = req.body;
+    const newInquiry = new Inquiry({ userName: req.session.userData?.name ?? '', content });
     await newInquiry.save();
     res.redirect('/contact_us');
   } catch (error) {

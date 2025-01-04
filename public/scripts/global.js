@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('reloadAttempts');
     } catch {
       const reloadAttempts = parseInt(sessionStorage.getItem('reloadAttempts') || '0');
-      if (reloadAttempts < 3) {
+      if (reloadAttempts < 5) {
         sessionStorage.setItem('reloadAttempts', reloadAttempts + 1);
         setTimeout(() => {
           location.reload(true);

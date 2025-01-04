@@ -90,8 +90,7 @@
       <div class="container mt-5">
         <form action="/inquiry" method="post">
           <fieldset>
-            <legend>문의사항</legend>
-            <input type="hidden" id="user-id" name="userId" />
+            <legend style="margin: 0">문의사항</legend>
             <div class="form-group">
               <label for="textarea"></label>
               <textarea id="textarea" class="form-control" name="content" rows="10"></textarea>
@@ -110,7 +109,6 @@
     <script src="/scripts/global.js"></script>
     <script>
       document.getElementById('submit-btn').addEventListener('click', function () {
-        document.getElementById('user-id').value = localStorage.getItem('userId');
         alert('제출 완료');
       });
       window.onload = function () {
