@@ -58,10 +58,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userId = userData.id;
     updateUI(userId);
   } else {
-    google.accounts.id.initialize({
-      client_id: clientId,
-      callback: handleCredentialResponse,
-    });
+    try {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredentialResponse,
+      });
+      sessionStorage.removeItem('reloadAttempts');
+    } catch {
+      const reloadAttempts = parseInt(sessionStorage.getItem('reloadAttempts') || '0');
+      if (reloadAttempts < 1) {
+        sessionStorage.setItem('reloadAttempts', reloadAttempts + 1);
+        setTimeout(() => {
+          location.reload(true);
+        }, 100);
+      } else {
+        alert('탭이나 브라우저를 닫았다가 재접속해주세요. 재접속해도 문제가 계속되면 크롬 브라우저를 사용해주세요.');
+        setTimeout(() => {
+          location.reload(true);
+        }, 100);
+      }
+    }
     google.accounts.id.renderButton(document.querySelector('.g_id_signin'), {
       type: 'standard',
       shape: 'rectangular',
