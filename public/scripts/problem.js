@@ -24,10 +24,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ problem_id: problemId }),
+        body: JSON.stringify({ problemId }),
       });
       const problem = await problemResponse.json();
-      const userProblemScore = new Map(Object.entries(user.problem_score));
+      const userProblemScore = new Map(Object.entries(user.problemScore));
       const progressBar = document.getElementById('problem-score-bar');
       progressBar.style.width = `${((userProblemScore.get(problemId) ?? 0) / problem.score) * 100}%`;
       progressBar.textContent = `${userProblemScore.get(`${problemId}`) ?? 0}/${problem.score}`;
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('input').innerHTML = problem.input;
       document.getElementById('output').innerHTML = problem.output;
 
-      const sampleCount = problem.sample_input.length;
+      const sampleCount = problem.sampleInput.length;
       const leftContainer = document.getElementById('left-container');
       for (let i = 0; i < sampleCount; i++) {
         const sampleContainer = document.createElement('div');
@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         inputCopyButton.type = 'button';
         inputCopyButton.className = 'btn btn-link ms-1';
         inputCopyButton.textContent = '복사';
-        inputCopyButton.onclick = () => navigator.clipboard.writeText(problem.sample_input[i]);
+        inputCopyButton.onclick = () => navigator.clipboard.writeText(problem.sampleInput[i]);
         sampleInputTitleContainer.appendChild(sampleInputTitle);
         sampleInputTitleContainer.appendChild(inputCopyButton);
         const sampleInputData = document.createElement('pre');
         sampleInputData.className = 'sample-data';
-        sampleInputData.textContent = problem.sample_input[i];
+        sampleInputData.textContent = problem.sampleInput[i];
         sampleInputContainer.appendChild(sampleInputTitleContainer);
         sampleInputContainer.appendChild(sampleInputData);
         sampleContainer.appendChild(sampleInputContainer);
@@ -72,19 +72,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         outputCopyButton.type = 'button';
         outputCopyButton.className = 'btn btn-link ms-1';
         outputCopyButton.textContent = '복사';
-        outputCopyButton.onclick = () => navigator.clipboard.writeText(problem.sample_output[i]);
+        outputCopyButton.onclick = () => navigator.clipboard.writeText(problem.sampleOutput[i]);
         sampleOutputTitleContainer.appendChild(sampleOutputTitle);
         sampleOutputTitleContainer.appendChild(outputCopyButton);
         const sampleOutputData = document.createElement('pre');
         sampleOutputData.className = 'sample-data';
-        sampleOutputData.textContent = problem.sample_output[i];
+        sampleOutputData.textContent = problem.sampleOutput[i];
         sampleOutputContainer.appendChild(sampleOutputTitleContainer);
         sampleOutputContainer.appendChild(sampleOutputData);
         sampleContainer.appendChild(sampleOutputContainer);
         leftContainer.appendChild(sampleContainer);
       }
       const timeLimit = document.createElement('h5');
-      timeLimit.textContent = `시간 제한: ${problem.time_limit}초`;
+      timeLimit.textContent = `시간 제한: ${problem.timeLimit}초`;
       leftContainer.appendChild(timeLimit);
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 

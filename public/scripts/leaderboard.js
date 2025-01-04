@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const usersResponse = await fetch('/get-all-users');
   const usersJson = await usersResponse.json();
   const users = usersJson.users;
-  const userIndex = usersJson.user_index;
+  const userIndex = usersJson.userIndex;
   let i = 0,
     j = 0;
   users.forEach((user) => {
@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tdUserId = document.createElement('td');
     tdUserId.textContent = user.id;
     const tdTotalScore = document.createElement('td');
-    tdTotalScore.textContent = user.total_score;
+    tdTotalScore.textContent = user.totalScore;
     const tdScoreUpdate = document.createElement('td');
-    const scoreUpdate = new Date(user.score_update);
+    const scoreUpdate = new Date(user.scoreUpdate);
     scoreUpdate.setHours(scoreUpdate.getHours() + 9);
     tdScoreUpdate.textContent = scoreUpdate.toISOString().replace('T', ' ').slice(0, -1);
     tr.appendChild(th);

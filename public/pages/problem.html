@@ -35,11 +35,18 @@
         font-size: 40px !important;
         font-weight: 600 !important;
       }
+      #description,
+      #input,
+      #output {
+        font-size: 113%;
+        font-family: sans-serif;
+        line-height: 1.8;
+      }
       .sample-data {
         background-color: #f7f7f9;
         border: 1px solid #e1e1e8;
         font-size: 120%;
-        font-family: monospace;
+        font-family: consolas, monospace;
         padding: 8px;
         margin: 0;
         overflow-x: auto;
@@ -147,13 +154,13 @@
             </div>
             <h2 id="title" class="mt-4"></h2>
             <h4 class="mt-5 underline">문제</h4>
-            <h5 id="description" class="mt-4 mb-4"></h5>
+            <p id="description" class="mt-4 mb-4"></p>
             <hr />
             <h4 class="underline">입력</h4>
-            <h5 id="input" class="mt-4 mb-4"></h5>
+            <p id="input" class="mt-4 mb-4"></p>
             <hr />
             <h4 class="underline">출력</h4>
-            <h5 id="output" class="mt-4 mb-4"></h5>
+            <p id="output" class="mt-4 mb-4"></p>
             <hr />
           </div>
           <div class="col-lg-6 col-md-12">

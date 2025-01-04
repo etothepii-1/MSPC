@@ -34,31 +34,31 @@ const userSchema = new mongoose.Schema({
   name: String,
   sub: String,
   id: String,
-  total_score: Number,
-  score_update: Date,
-  problem_score: Map,
-  language: String,
   role: String,
+  totalScore: Number,
+  scoreUpdate: Date,
+  problemScore: Map,
+  language: String,
 });
 const User = mongoose.model('User', userSchema);
 
 app.post('/user-register', async (req, res) => {
   try {
-    const { user_name, user_sub } = req.body;
-    let user = await User.findOne({ sub: user_sub }, { _id: 0, __v: 0 });
+    const { userName, userSub } = req.body;
+    let user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     if (!user) {
       const newUser = new User({
-        name: user_name,
-        sub: user_sub,
-        id: user_name,
-        total_score: 0,
-        score_update: new Date(),
-        problem_score: {},
-        language: 'c',
+        name: userName,
+        sub: userSub,
+        id: userName,
         role: '',
+        totalScore: 0,
+        scoreUpdate: new Date(),
+        problemScore: {},
+        language: 'c',
       });
       await newUser.save();
-      user = await User.findOne({ sub: user_sub }, { _id: 0, __v: 0 });
+      user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     }
     req.session.userData = user;
     res.json(req.session.userData);
@@ -99,9 +99,9 @@ const problemSchema = new mongoose.Schema({
   description: String,
   input: String,
   output: String,
-  sample_input: [String],
-  sample_output: [String],
-  time_limit: Number,
+  sampleInput: [String],
+  sampleOutput: [String],
+  timeLimit: Number,
   score: Number,
 });
 const Problem = mongoose.model('Problem', problemSchema);
@@ -111,9 +111,9 @@ const problem15 = new Problem({
   description: '',
   input: '',
   output: '',
-  sample_input: [''],
-  sample_output: [''],
-  time_limit: 1,
+  sampleInput: [''],
+  sampleOutput: [''],
+  timeLimit: 1,
   score: 50,
 });
 
@@ -121,14 +121,14 @@ const testdataSchema = new mongoose.Schema({
   id: Number,
   input: [String],
   output: [String],
-  time_limit: String,
+  timeLimit: String,
 });
 const Testdata = mongoose.model('Testdata', testdataSchema);
 const testdata15 = new Testdata({
   id: 15,
   input: [''],
   output: [''],
-  time_limit: '1',
+  timeLimit: '1',
 });
 
 app.get('/problems', (req, res) => {
@@ -183,8 +183,8 @@ app.post('/get-problem', async (req, res) => {
     const currentDate = new Date();
     const startDate = new Date(process.env.START_DATE);
     if (currentDate >= startDate) {
-      const { problem_id } = req.body;
-      const problem = await Problem.findOne({ id: problem_id });
+      const { problemId } = req.body;
+      const problem = await Problem.findOne({ id: problemId });
       res.json(problem);
     } else {
       res.end();
@@ -196,8 +196,8 @@ app.post('/get-problem', async (req, res) => {
 });
 
 const submissionSchema = new mongoose.Schema({
-  user_name: String,
-  problem_id: Number,
+  userName: String,
+  problemId: Number,
   code: String,
   language: Number,
   status: Number,
@@ -213,7 +213,7 @@ app.post('/submit', async (req, res) => {
     const user = req.session.userData;
     let userProblemsScore;
     try {
-      userProblemsScore = new Map(user.problem_score);
+      userProblemsScore = new Map(user.problemScore);
     } catch {
       userProblemsScore = new Map();
     }
@@ -225,7 +225,7 @@ app.post('/submit', async (req, res) => {
         source_code: code,
         stdin,
         expected_output: testdata.output[index],
-        cpu_time_limit: testdata.time_limit,
+        cpu_time_limit: testdata.timeLimit,
       })),
     };
 
@@ -261,17 +261,17 @@ app.post('/submit', async (req, res) => {
     const currentDate = new Date();
     const endDate = new Date(process.env.END_DATE);
     if (statusId === 3 && scoreIncrease !== 0 && currentDate < endDate) {
-      await User.findOneAndUpdate({ sub: user.sub }, { $inc: { total_score: scoreIncrease } }, { new: true });
-      await User.findOneAndUpdate({ sub: user.sub }, { $set: { [`problem_score.${problemId}`]: problemScore } }, { new: true });
-      await User.findOneAndUpdate({ sub: user.sub }, { score_update: new Date() }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { $inc: { totalScore: scoreIncrease } }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { $set: { [`problemScore.${problemId}`]: problemScore } }, { new: true });
+      await User.findOneAndUpdate({ sub: user.sub }, { scoreUpdate: new Date() }, { new: true });
     }
     req.session.userData = await User.findOne({ sub: req.session.userData.sub }, { _id: 0, __v: 0 });
     const userName = user.name;
     const submission = new Submission({
-      user_name: userName,
-      problem_id: problemId,
-      code: code,
-      language: language,
+      userName,
+      problemId,
+      code,
+      language,
       status: statusId,
       date: currentDate,
     });
@@ -290,18 +290,18 @@ app.get('/leaderboard', (req, res) => {
 app.get('/get-all-users', async (req, res) => {
   try {
     const usersWithSub = await User.find({ role: { $ne: 'Admin' } }, {}).sort({
-      total_score: -1,
-      score_update: 1,
+      totalScore: -1,
+      scoreUpdate: 1,
     });
     let userIndex = -1;
     if (req.session.userData) {
       userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
     }
     const users = await User.find({ role: { $ne: 'Admin' } }, { name: 0, sub: 0, _id: 0 }).sort({
-      total_score: -1,
-      score_update: 1,
+      totalScore: -1,
+      scoreUpdate: 1,
     });
-    res.json({ users, user_index: userIndex });
+    res.json({ users, userIndex });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -313,15 +313,15 @@ app.get('/contact_us', (req, res) => {
 });
 
 const inquirySchema = new mongoose.Schema({
-  user_id: String,
+  userName: String,
   content: String,
 });
 const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 app.post('/inquiry', async (req, res) => {
   try {
-    const { userId, content } = req.body;
-    const newInquiry = new Inquiry({ user_id: userId, content });
+    const { userName, content } = req.body;
+    const newInquiry = new Inquiry({ userName, content });
     await newInquiry.save();
     res.redirect('/contact_us');
   } catch (error) {

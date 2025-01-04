@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const problems = await problemResponse.json();
     if (problems.started !== false) {
       let totalScore = 0;
-      const userProblemScore = new Map(Object.entries(user.problem_score));
+      const userProblemScore = new Map(Object.entries(user.problemScore));
       problems.forEach((problem) => {
         const problemLink = document.createElement('a');
         problemLink.href = `/problems/${problem.id}`;
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.list-group').appendChild(problemLink);
         totalScore += problem.score;
       });
-      const userTotalScore = user.total_score ?? 0;
+      const userTotalScore = user.totalScore ?? 0;
       const totalScoreProgressBar = document.getElementById('total-score-bar');
       totalScoreProgressBar.style.width = `${(userTotalScore / totalScore) * 100}%`;
       totalScoreProgressBar.textContent = `${userTotalScore}/${totalScore}`;

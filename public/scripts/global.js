@@ -23,7 +23,7 @@ async function userRegister(userName, userSub) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ user_name: userName, user_sub: userSub }),
+    body: JSON.stringify({ userName, userSub }),
   });
   const data = await response.json();
   return data.id;
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('reloadAttempts');
     } catch {
       const reloadAttempts = parseInt(sessionStorage.getItem('reloadAttempts') || '0');
-      if (reloadAttempts < 1) {
+      if (reloadAttempts < 3) {
         sessionStorage.setItem('reloadAttempts', reloadAttempts + 1);
         setTimeout(() => {
           location.reload(true);
