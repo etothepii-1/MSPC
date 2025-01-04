@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const userDataResponse = await fetch('/get-user');
-  let userData;
+  const userResponse = await fetch('/get-user');
+  let user;
   try {
-    userData = await userDataResponse.json();
+    user = await userResponse.json();
   } catch {
-    userData = undefined;
+    user = undefined;
   }
-  if (userData) {
+  if (user) {
     const url = window.location.href;
     const idMatch = url.match(/\/problems\/(\d+)/);
     const problemId = idMatch[1];
@@ -19,8 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const problemExists = await problemExistsResponse.json();
     if (problemExists.exists) {
-      const userResponse = await fetch('/get-user');
-      const user = await userResponse.json();
       const problemResponse = await fetch('/get-problem', {
         method: 'POST',
         headers: {
@@ -92,15 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       let initLanguage = user.language;
       if (sessionStorage.getItem('init-language') === 'true') initLanguage = sessionStorage.getItem('language');
-      if (initLanguage == 49) initLanguage = 'c';
-      else if (initLanguage === '53') initLanguage = 'cpp';
-      else if (initLanguage === '71') initLanguage = 'python';
-      else if (initLanguage === '62') initLanguage = 'java';
-      else if (initLanguage === '73') initLanguage = 'rust';
-      else if (initLanguage === '60') initLanguage = 'go';
-      else if (initLanguage === '51') initLanguage = 'csharp';
-      else if (initLanguage === '63') initLanguage = 'javascript';
-      else if (initLanguage === '72') initLanguage = 'ruby';
+      const languageMap = { 49: 'c', 53: 'cpp', 71: 'python', 62: 'java', 73: 'rust', 60: 'go', 51: 'csharp', 63: 'javascript', 72: 'ruby' };
+      initLanguage = languageMap[initLanguage] || initLanguage;
       document.getElementById(initLanguage).selected = true;
       let editor;
       require.config({ paths: { vs: 'https://unpkg.com/monaco-editor/min/vs' } });
@@ -120,15 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('language').addEventListener('change', (event) => {
           let language = event.target.value;
-          if (language == 49) language = 'c';
-          else if (language === '53') language = 'cpp';
-          else if (language === '71') language = 'python';
-          else if (language === '62') language = 'java';
-          else if (language === '73') language = 'rust';
-          else if (language === '60') language = 'go';
-          else if (language === '51') language = 'csharp';
-          else if (language === '63') language = 'javascript';
-          else if (language === '72') language = 'ruby';
+          language = languageMap[language];
           monaco.editor.setModelLanguage(editor.getModel(), language);
         });
 
@@ -150,23 +133,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const data = await response.json();
             const modalBody = document.getElementById('modalBody');
-            if (data.result === 3) {
-              modalBody.textContent = '맞았습니다!';
-              modalBody.style.color = '#009874';
-              modalBody.style.fontWeight = 'bold';
-            } else if (data.result === 4) {
-              modalBody.textContent = '틀렸습니다';
-              modalBody.style.color = '#dd4124';
-            } else if (data.result === 5) {
-              modalBody.textContent = '시간 초과';
-              modalBody.style.color = '#fa7268';
-            } else if (data.result === 6 || data.result === 13 || data.result === 14) {
-              modalBody.textContent = '컴파일 에러';
-              modalBody.style.color = '#0f4c81';
-            } else {
-              modalBody.textContent = '런타임 에러';
-              modalBody.style.color = '#5f4b8b';
-            }
+            const resultMessages = {
+              3: { text: '맞았습니다!', color: '#009874', fontWeight: 'bold' },
+              4: { text: '틀렸습니다', color: '#dd4124' },
+              5: { text: '시간 초과', color: '#fa7268' },
+              6: { text: '컴파일 에러', color: '#0f4c81' },
+              13: { text: '컴파일 에러', color: '#0f4c81' },
+              14: { text: '컴파일 에러', color: '#0f4c81' },
+              default: { text: '런타임 에러', color: '#5f4b8b' },
+            };
+            const result = resultMessages[data.result] || resultMessages.default;
+            modalBody.textContent = result.text;
+            modalBody.style.color = result.color;
+            if (result.fontWeight) modalBody.style.fontWeight = result.fontWeight;
             document.getElementById('close-button').style.display = 'block';
           } else {
             alert('내용을 입력하세요');

@@ -1,17 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const userDataResponse = await fetch('/get-user');
-  let userData;
+  const userResponse = await fetch('/get-user');
+  let user;
   try {
-    userData = await userDataResponse.json();
+    user = await userResponse.json();
   } catch {
-    userData = undefined;
+    user = undefined;
   }
-  if (userData) {
+  if (user) {
     const problemResponse = await fetch('/get-all-problems');
     const problems = await problemResponse.json();
     if (problems.started !== false) {
-      const userResponse = await fetch('/get-user');
-      const user = await userResponse.json();
       let totalScore = 0;
       const userProblemScore = new Map(Object.entries(user.problem_score));
       problems.forEach((problem) => {

@@ -3,6 +3,7 @@ const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
+
 const app = express();
 mongoose.set('strictQuery', false);
 
@@ -43,14 +44,13 @@ const User = mongoose.model('User', userSchema);
 
 app.post('/user-register', async (req, res) => {
   try {
-    const userName = req.body.user_name;
-    const userSub = req.body.user_sub;
-    let user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
+    const { user_name, user_sub } = req.body;
+    let user = await User.findOne({ sub: user_sub }, { _id: 0, __v: 0 });
     if (!user) {
       const newUser = new User({
-        name: userName,
-        sub: userSub,
-        id: userName,
+        name: user_name,
+        sub: user_sub,
+        id: user_name,
         total_score: 0,
         score_update: new Date(),
         problem_score: {},
@@ -58,7 +58,7 @@ app.post('/user-register', async (req, res) => {
         role: '',
       });
       await newUser.save();
-      user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
+      user = await User.findOne({ sub: user_sub }, { _id: 0, __v: 0 });
     }
     req.session.userData = user;
     res.json(req.session.userData);
@@ -68,7 +68,7 @@ app.post('/user-register', async (req, res) => {
   }
 });
 
-app.get('/get-user', async (req, res) => {
+app.get('/get-user', (req, res) => {
   try {
     res.json(req.session.userData);
   } catch (error) {
@@ -83,8 +83,9 @@ app.get('/logout', (req, res) => {
       if (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
+      } else {
+        res.end();
       }
-      res.end();
     });
   } catch (error) {
     console.error(error);
@@ -141,7 +142,9 @@ app.get('/get-all-problems', async (req, res) => {
     if (currentDate >= startDate) {
       const problems = await Problem.find({}, { _id: 0 }).sort({ id: 1 });
       res.json(problems);
-    } else res.json({ started: false });
+    } else {
+      res.json({ started: false });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -153,7 +156,9 @@ app.get('/problems/:id', (req, res) => {
   const startDate = new Date(process.env.START_DATE);
   if (currentDate >= startDate) {
     res.sendFile(path.join(__dirname, 'public', 'pages', 'problem.html'));
-  } else res.end();
+  } else {
+    res.end();
+  }
 });
 
 app.post('/problem-exists', async (req, res) => {
@@ -164,7 +169,9 @@ app.post('/problem-exists', async (req, res) => {
       const { problemId } = req.body;
       const exists = await Problem.exists({ id: problemId });
       res.json({ exists });
-    } else res.end();
+    } else {
+      res.end();
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -176,10 +183,12 @@ app.post('/get-problem', async (req, res) => {
     const currentDate = new Date();
     const startDate = new Date(process.env.START_DATE);
     if (currentDate >= startDate) {
-      const problemId = req.body.problem_id;
-      const problem = await Problem.findOne({ id: problemId });
+      const { problem_id } = req.body;
+      const problem = await Problem.findOne({ id: problem_id });
       res.json(problem);
-    } else res.end();
+    } else {
+      res.end();
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -205,7 +214,7 @@ app.post('/submit', async (req, res) => {
     let userProblemsScore;
     try {
       userProblemsScore = new Map(user.problem_score);
-    } catch (error) {
+    } catch {
       userProblemsScore = new Map();
     }
     const userProblemScore = userProblemsScore.get(problemId) ?? 0;
@@ -239,7 +248,9 @@ app.post('/submit', async (req, res) => {
             return { status: { id: 13 } };
           } else if (result.status.id === 1 || result.status.id === 2) {
             await new Promise((resolve) => setTimeout(resolve, 100));
-          } else break;
+          } else {
+            break;
+          }
         }
         return result;
       })
@@ -290,7 +301,7 @@ app.get('/get-all-users', async (req, res) => {
       total_score: -1,
       score_update: 1,
     });
-    res.json({ users: users, user_index: userIndex });
+    res.json({ users, user_index: userIndex });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -310,7 +321,7 @@ const Inquiry = mongoose.model('Inquiry', inquirySchema);
 app.post('/inquiry', async (req, res) => {
   try {
     const { userId, content } = req.body;
-    const newInquiry = new Inquiry({ user_id: userId, content: content });
+    const newInquiry = new Inquiry({ user_id: userId, content });
     await newInquiry.save();
     res.redirect('/contact_us');
   } catch (error) {
@@ -325,7 +336,7 @@ app.get('/settings', (req, res) => {
 
 app.post('/change-id', async (req, res) => {
   try {
-    const id = req.body.id;
+    const { id } = req.body;
     await User.findOneAndUpdate({ sub: req.session.userData.sub }, { id }, { new: true });
     req.session.userData.id = id;
     res.end();
@@ -337,7 +348,7 @@ app.post('/change-id', async (req, res) => {
 
 app.post('/change-language', async (req, res) => {
   try {
-    const language = req.body.language;
+    const { language } = req.body;
     await User.findOneAndUpdate({ sub: req.session.userData.sub }, { language }, { new: true });
     req.session.userData.language = language;
     res.end();

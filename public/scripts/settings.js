@@ -1,14 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const userDataResponse = await fetch('/get-user');
-  let userData;
+  const userResponse = await fetch('/get-user');
+  let user;
   try {
-    userData = await userDataResponse.json();
+    user = await userResponse.json();
   } catch {
-    userData = undefined;
+    user = undefined;
   }
-  if (userData) {
-    const userResponse = await fetch('/get-user');
-    const user = await userResponse.json();
+  if (user) {
     document.getElementById('id').value = user.id;
     document.getElementById(user.language).selected = true;
     document.getElementById('change-id-btn').className = 'btn btn-dark mt-3 disabled';
@@ -27,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('change-id-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const userId = document.getElementById('id').value;
-    fetch('/change-id', {
+    await fetch('/change-id', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,11 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     location.reload(true);
   });
 
-  document.getElementById('id').addEventListener('input', (event) => {
+  document.getElementById('id').addEventListener('input', () => {
     document.getElementById('change-id-btn').className = 'btn btn-dark mt-3';
   });
 
-  document.getElementById('language').addEventListener('change', (event) => {
+  document.getElementById('language').addEventListener('change', () => {
     document.getElementById('change-language-btn').className = 'btn btn-dark mt-3';
   });
 
