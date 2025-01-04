@@ -282,7 +282,10 @@ app.get('/get-all-users', async (req, res) => {
       total_score: -1,
       score_update: 1,
     });
-    const userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
+    let userIndex = -1;
+    if (req.session.userData) {
+      userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
+    }
     const users = await User.find({ role: { $ne: 'Admin' } }, { name: 0, sub: 0, _id: 0 }).sort({
       total_score: -1,
       score_update: 1,
