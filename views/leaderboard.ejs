@@ -13,9 +13,6 @@
       crossorigin="anonymous"
     />
     <style>
-      body {
-        visibility: hidden;
-      }
       .g_id_signin {
         height: 40px;
         width: 182px;
@@ -60,27 +57,30 @@
             <li class="nav-item">
               <a class="nav-link me-4" href="/contact_us">문의하기</a>
             </li>
-            <li class="nav-item g_id_signin">
-              <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
-              <div
-                class="g_id_signin"
-                data-type="standard"
-                data-shape="rectangular"
-                data-theme="filled_black"
-                data-text="signin_with"
-                data-size="large"
-                data-logo_alignment="left"
-                data-width="40"
-                style="display: none"
-              ></div>
-            </li>
-            <li class="nav-item dropdown" id="user-info" style="display: none">
-              <a class="nav-link dropdown-toggle" id="user-name" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
-              <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                <li><a class="dropdown-item black" href="/settings">설정</a></li>
-                <li><a class="dropdown-item red text-danger" id="logout-btn" href="">로그아웃</a></li>
-              </ul>
-            </li>
+            <% if (loggedIn) { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><%= userId %></a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                  <li><a class="dropdown-item black" href="/settings">설정</a></li>
+                  <li><a class="dropdown-item red text-danger" id="logout-btn" href="#">로그아웃</a></li>
+                </ul>
+              </li>
+            <% } else { %>
+              <li class="nav-item g_id_signin">
+                <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
+                <div
+                  class="g_id_signin"
+                  data-type="standard"
+                  data-shape="rectangular"
+                  data-theme="filled_black"
+                  data-text="signin_with"
+                  data-size="large"
+                  data-logo_alignment="left"
+                  data-width="40"
+                  style="display: none"
+                ></div>
+              </li>
+            <% } %>
           </ul>
         </div>
       </div>
@@ -97,7 +97,26 @@
               <th scope="col">해당 총점 도달 시각</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            <% let i = 0, j = 0; %>
+            <% users.forEach((user) => { %>
+              <tr class="<%= j === userIndex ? 'table-active' : '' %>">
+                <th scope="row">
+                  <% if (user.role === '') { %>
+                    <%= ++i %>
+                  <% } else { %>
+                    <%= user.role %>
+                  <% } %>
+                </th>
+                <td><%= user.id %></td>
+                <td><%= user.totalScore %></td>
+                <% const scoreUpdate = new Date(user.scoreUpdate); %>
+                <% scoreUpdate.setHours(scoreUpdate.getHours() + 9); %>
+                <td><%= scoreUpdate.toISOString().replace('T', ' ').slice(0, -1) %></td>
+              </tr>
+              <% j++; %>
+            <% }); %>
+          </tbody>
         </table>
       </div>
     </main>
@@ -108,6 +127,5 @@
       crossorigin="anonymous"
     ></script>
     <script src="/scripts/global.js"></script>
-    <script src="/scripts/leaderboard.js"></script>
   </body>
 </html>

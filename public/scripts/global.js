@@ -1,34 +1,3 @@
-async function loadGoogleSignIn() {
-  const response = await fetch('/get-client-id');
-  const data = await response.json();
-  return data.clientId;
-}
-
-function updateUI(userId) {
-  if (userId) {
-    document.querySelector('.g_id_signin').style.display = 'none';
-    document.getElementById('user-name').textContent = userId;
-    document.getElementById('user-name').style.display = 'block';
-    document.getElementById('user-info').style.display = 'block';
-  } else {
-    document.getElementById('user-name').style.display = 'none';
-    document.getElementById('user-info').style.display = 'none';
-    document.querySelector('.g_id_signin').style.display = 'block';
-  }
-}
-
-async function userRegister(userName, userSub) {
-  const response = await fetch('/user-register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ userName, userSub }),
-  });
-  const data = await response.json();
-  return data.id;
-}
-
 async function handleCredentialResponse(response) {
   const payload = JSON.parse(
     decodeURIComponent(
@@ -40,25 +9,22 @@ async function handleCredentialResponse(response) {
   );
   const userName = payload.name;
   const userSub = payload.sub;
-  const userId = await userRegister(userName, userSub);
-  updateUI(userId);
+  await fetch('/user-register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userName, userSub }),
+  });
   location.reload(true);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const userDataResponse = await fetch('/get-user');
-  let userData;
-  try {
-    userData = await userDataResponse.json();
-  } catch {
-    userData = undefined;
-  }
-  if (userData) {
-    const userId = userData.id;
-    updateUI(userId);
-  } else {
+  if (document.querySelector('.g_id_signin')) {
     try {
-      const clientId = await loadGoogleSignIn();
+      const response = await fetch('/get-client-id');
+      const data = await response.json();
+      const clientId = data.clientId;
       google.accounts.id.initialize({
         client_id: clientId,
         callback: handleCredentialResponse,
@@ -87,12 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       logo_alignment: 'left',
       width: '40',
     });
-    document.querySelector('.g_id_signin').style.display = 'block';
   }
 
-  document.getElementById('logout-btn').onclick = async () => {
+  document.getElementById('logout-btn').onclick = async (event) => {
+    event.preventDefault();
     await fetch('/logout');
-    updateUI(null);
     location.reload(true);
   };
 });

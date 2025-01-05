@@ -25,11 +25,25 @@ app.use(
 );
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
+  try {
+    if (req.session.userData) {
+      res.render('index', { loggedIn: true, userId: req.session.userData.id });
+    } else {
+      res.render('index', { loggedIn: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.get('/get-client-id', (req, res) => {
-  res.json({ clientId: process.env.GOOGLE_CLIENT_ID });
+  try {
+    res.json({ clientId: process.env.GOOGLE_CLIENT_ID });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 const userSchema = new mongoose.Schema({
@@ -63,15 +77,6 @@ app.post('/user-register', async (req, res) => {
       user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     }
     req.session.userData = user;
-    res.json(req.session.userData);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.get('/get-user', (req, res) => {
-  try {
     res.json(req.session.userData);
   } catch (error) {
     console.error(error);
@@ -133,19 +138,26 @@ const testdata15 = new Testdata({
   timeLimit: '1',
 });
 
-app.get('/problems', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pages', 'problems.html'));
-});
-
-app.get('/get-all-problems', async (req, res) => {
+app.get('/problems', async (req, res) => {
   try {
     const currentDate = new Date();
     const startDate = new Date(process.env.START_DATE);
+    let problems;
     if (currentDate >= startDate) {
-      const problems = await Problem.find({}, { _id: 0 }).sort({ id: 1 });
-      res.json(problems);
+      problems = await Problem.find({}, { _id: 0, id: 1, title: 1, score: 1 }).sort({ id: 1 });
     } else {
-      res.json({ started: false });
+      problems = false;
+    }
+    if (req.session.userData) {
+      res.render('problems', {
+        loggedIn: true,
+        userId: req.session.userData.id,
+        userTotalScore: req.session.userData.totalScore,
+        problems,
+        userProblemScore: req.session.userData.problemScore,
+      });
+    } else {
+      res.render('problems', { loggedIn: false });
     }
   } catch (error) {
     console.error(error);
@@ -153,43 +165,32 @@ app.get('/get-all-problems', async (req, res) => {
   }
 });
 
-app.get('/problems/:id', (req, res) => {
-  const currentDate = new Date();
-  const startDate = new Date(process.env.START_DATE);
-  if (currentDate >= startDate) {
-    res.sendFile(path.join(__dirname, 'public', 'pages', 'problem.html'));
-  } else {
-    res.end();
-  }
-});
-
-app.post('/problem-exists', async (req, res) => {
+app.get('/problems/:id', async (req, res) => {
   try {
     const currentDate = new Date();
     const startDate = new Date(process.env.START_DATE);
+    let problem;
     if (currentDate >= startDate) {
-      const { problemId } = req.body;
-      const exists = await Problem.exists({ id: problemId });
-      res.json({ exists });
+      problem = await Problem.findOne({ id: req.params.id }, { _id: 0, __v: 0 });
     } else {
-      res.end();
+      problem = false;
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.post('/get-problem', async (req, res) => {
-  try {
-    const currentDate = new Date();
-    const startDate = new Date(process.env.START_DATE);
-    if (currentDate >= startDate) {
-      const { problemId } = req.body;
-      const problem = await Problem.findOne({ id: problemId });
-      res.json(problem);
+    if (req.session.userData) {
+      let userProblemScore;
+      try {
+        userProblemScore = new Map(Object.entries(req.session.userData.problemScore)).get(`${problem.id}`) ?? 0;
+      } catch {
+        userProblemScore = 0;
+      }
+      res.render('problem', {
+        loggedIn: true,
+        userId: req.session.userData.id,
+        userProblemScore,
+        problem,
+        userLanguage: req.session.userData.language,
+      });
     } else {
-      res.end();
+      res.render('problem', { loggedIn: false });
     }
   } catch (error) {
     console.error(error);
@@ -285,11 +286,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-app.get('/leaderboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pages', 'leaderboard.html'));
-});
-
-app.get('/get-all-users', async (req, res) => {
+app.get('/leaderboard', async (req, res) => {
   try {
     const usersWithSub = await User.find({ role: { $ne: 'Admin' } }, {}).sort({
       totalScore: -1,
@@ -299,11 +296,15 @@ app.get('/get-all-users', async (req, res) => {
     if (req.session.userData) {
       userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
     }
-    const users = await User.find({ role: { $ne: 'Admin' } }, { name: 0, sub: 0, _id: 0 }).sort({
+    const users = await User.find({ role: { $ne: 'Admin' } }, { _id: 0, id: 1, role: 1, totalScore: 1, scoreUpdate: 1 }).sort({
       totalScore: -1,
       scoreUpdate: 1,
     });
-    res.json({ users, userIndex });
+    if (req.session.userData) {
+      res.render('leaderboard', { loggedIn: true, userId: req.session.userData.id, users, userIndex });
+    } else {
+      res.render('leaderboard', { loggedIn: false, users, userIndex });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -311,7 +312,16 @@ app.get('/get-all-users', async (req, res) => {
 });
 
 app.get('/contact_us', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pages', 'contact-us.html'));
+  try {
+    if (req.session.userData) {
+      res.render('contact-us', { loggedIn: true, userId: req.session.userData.id });
+    } else {
+      res.render('contact-us', { loggedIn: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 const inquirySchema = new mongoose.Schema({
@@ -333,7 +343,16 @@ app.post('/inquiry', async (req, res) => {
 });
 
 app.get('/settings', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'pages', 'settings.html'));
+  try {
+    if (req.session.userData) {
+      res.render('settings', { loggedIn: true, userId: req.session.userData.id, userLanguage: req.session.userData.language });
+    } else {
+      res.render('settings', { loggedIn: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.post('/change-id', async (req, res) => {

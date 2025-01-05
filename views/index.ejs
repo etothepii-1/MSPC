@@ -13,9 +13,6 @@
       crossorigin="anonymous"
     />
     <style>
-      body {
-        visibility: hidden;
-      }
       .g_id_signin {
         height: 40px;
         width: 182px;
@@ -49,7 +46,7 @@
         <div class="collapse navbar-collapse justify-content-md-end" id="navbars">
           <ul class="navbar-nav text-nowrap">
             <li class="nav-item">
-              <a class="nav-link me-4" href="/">Home</a>
+              <a class="nav-link me-4 active" href="/" aria-current="page">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link me-4" href="/problems">문제 목록</a>
@@ -58,46 +55,40 @@
               <a class="nav-link me-4" href="/leaderboard">리더보드</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link me-4 active" href="/contact_us" aria-current="page">문의하기</a>
+              <a class="nav-link me-4" href="/contact_us">문의하기</a>
             </li>
-            <li class="nav-item g_id_signin">
-              <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
-              <div
-                class="g_id_signin"
-                data-type="standard"
-                data-shape="rectangular"
-                data-theme="filled_black"
-                data-text="signin_with"
-                data-size="large"
-                data-logo_alignment="left"
-                data-width="40"
-                style="display: none"
-              ></div>
-            </li>
-            <li class="nav-item dropdown" id="user-info" style="display: none">
-              <a class="nav-link dropdown-toggle" id="user-name" href="#" data-bs-toggle="dropdown" aria-expanded="false"></a>
-              <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                <li><a class="dropdown-item black" href="/settings">설정</a></li>
-                <li><a class="dropdown-item red text-danger" id="logout-btn" href="">로그아웃</a></li>
-              </ul>
-            </li>
+            <% if (loggedIn) { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><%= userId %></a>
+                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                  <li><a class="dropdown-item black" href="/settings">설정</a></li>
+                  <li><a class="dropdown-item red text-danger" id="logout-btn" href="#">로그아웃</a></li>
+                </ul>
+              </li>
+            <% } else { %>
+              <li class="nav-item g_id_signin">
+                <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
+                <div
+                  class="g_id_signin"
+                  data-type="standard"
+                  data-shape="rectangular"
+                  data-theme="filled_black"
+                  data-text="signin_with"
+                  data-size="large"
+                  data-logo_alignment="left"
+                  data-width="40"
+                  style="display: none"
+                ></div>
+              </li>
+            <% } %>
           </ul>
         </div>
       </div>
     </nav>
 
     <main>
-      <div class="container mt-5">
-        <form action="/inquiry" method="post">
-          <fieldset>
-            <legend style="margin: 0">문의사항</legend>
-            <div class="form-group">
-              <label for="textarea"></label>
-              <textarea id="textarea" class="form-control" name="content" rows="10"></textarea>
-            </div>
-            <input id="submit-btn" class="btn btn-dark mt-4" type="submit" value="제출" />
-          </fieldset>
-        </form>
+      <div class="container-fluid mt-5 text-center mb-4">
+        <img src="/images/logo-black.png" class="mx-auto d-block" alt="MSPC Logo" />
       </div>
     </main>
 
@@ -107,13 +98,5 @@
       crossorigin="anonymous"
     ></script>
     <script src="/scripts/global.js"></script>
-    <script>
-      document.getElementById('submit-btn').addEventListener('click', function () {
-        alert('제출 완료');
-      });
-      window.onload = function () {
-        document.body.style.visibility = 'visible';
-      };
-    </script>
   </body>
 </html>

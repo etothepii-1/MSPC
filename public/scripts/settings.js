@@ -1,27 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const userResponse = await fetch('/get-user');
-  let user;
-  try {
-    user = await userResponse.json();
-  } catch {
-    user = undefined;
-  }
-  if (user) {
-    document.getElementById('id').value = user.id;
-    document.getElementById(user.language).selected = true;
-    document.getElementById('change-id-btn').className = 'btn btn-dark mt-3 disabled';
-    document.getElementById('change-language-btn').className = 'btn btn-dark mt-3 disabled';
-  } else {
-    document.getElementById('change-id-form').style.display = 'none';
-    document.getElementById('change-language-form').style.display = 'none';
-    const requireLogin = document.createElement('h1');
-    requireLogin.className = 'mt-3';
-    const requireLoginBold = document.createElement('b');
-    requireLoginBold.textContent = '로그인해주세요';
-    requireLogin.appendChild(requireLoginBold);
-    document.querySelector('.container').appendChild(requireLogin);
-  }
-
+(async () => {
   document.getElementById('change-id-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const userId = document.getElementById('id').value;
@@ -56,6 +33,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('language').addEventListener('change', () => {
     document.getElementById('change-language-btn').className = 'btn btn-dark mt-3';
   });
-
-  document.body.style.visibility = 'visible';
-});
+})();
