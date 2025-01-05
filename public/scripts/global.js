@@ -46,7 +46,6 @@ async function handleCredentialResponse(response) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const clientId = await loadGoogleSignIn();
   const userDataResponse = await fetch('/get-user');
   let userData;
   try {
@@ -59,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateUI(userId);
   } else {
     try {
+      const clientId = await loadGoogleSignIn();
       google.accounts.id.initialize({
         client_id: clientId,
         callback: handleCredentialResponse,
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('reloadAttempts');
     } catch {
       const reloadAttempts = parseInt(sessionStorage.getItem('reloadAttempts') || '0');
-      if (reloadAttempts < 5) {
+      if (reloadAttempts < 10) {
         sessionStorage.setItem('reloadAttempts', reloadAttempts + 1);
         setTimeout(() => {
           location.reload(true);

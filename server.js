@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -19,6 +20,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 100 * 365 * 24 * 60 * 60 * 1000 },
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_CONNECTION }),
   })
 );
 
@@ -367,10 +369,9 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const PORT = process.env.PORT || 8080;
-const MONGODB_CONNECTION = process.env.MONGODB_CONNECTION;
 const start = async () => {
   try {
-    await mongoose.connect(MONGODB_CONNECTION);
+    await mongoose.connect(process.env.MONGODB_CONNECTION);
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Listening on ${PORT}`);
     });
