@@ -96,7 +96,7 @@
           </form>
           <form id="change-language-form" action="/change-language" method="post">
             <label for="language" class="mt-5 h3">기본 언어 변경</label>
-            <select id="language" name="language" class="form-select">
+            <select id="language" name="language" class="form-select mt-2">
               <option value="c" <%= userLanguage === 'c' ? 'selected' : '' %>>C (GCC 8.3.0)</option>
               <option value="cpp" <%= userLanguage === 'cpp' ? 'selected' : '' %>>C++ (GCC 8.3.0)</option>
               <option value="python" <%= userLanguage === 'python' ? 'selected' : '' %>>Python (3.8.1)</option>

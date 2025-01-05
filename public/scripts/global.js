@@ -32,16 +32,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('reloadAttempts');
     } catch {
       const reloadAttempts = parseInt(sessionStorage.getItem('reloadAttempts') || '0');
-      if (reloadAttempts < 10) {
+      if (reloadAttempts < 3) {
         sessionStorage.setItem('reloadAttempts', reloadAttempts + 1);
         setTimeout(() => {
           location.reload(true);
-        }, 100);
+        }, 10);
       } else {
         alert('탭이나 브라우저를 닫았다가 재접속해주세요. 재접속해도 문제가 계속되면 크롬 브라우저를 사용해주세요.');
         setTimeout(() => {
           location.reload(true);
-        }, 100);
+        }, 10);
       }
     }
     google.accounts.id.renderButton(document.querySelector('.g_id_signin'), {
