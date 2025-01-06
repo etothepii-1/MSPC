@@ -325,6 +325,7 @@ app.get('/contact_us', (req, res) => {
 });
 
 const inquirySchema = new mongoose.Schema({
+  loggedIn: Boolean,
   userName: String,
   content: String,
 });
@@ -332,9 +333,24 @@ const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 app.post('/inquiry', async (req, res) => {
   try {
-    const { content } = req.body;
-    const newInquiry = new Inquiry({ userName: req.session.userData?.name ?? '', content });
-    await newInquiry.save();
+    const { studentId, userName, content } = req.body;
+    const studentIdRegex = /^[1-3](0[1-9]|10)(0[1-9]|[12][0-9]|30)$/;
+    const userNameRegex = /^[가-힣]{2,3}$/;
+    if ((studentIdRegex.test(studentId) && userNameRegex.test(userName)) || (studentId === undefined && userName === undefined)) {
+      const duplicate = await Inquiry.findOne({
+        loggedIn: req.session.userData?.name ? true : false,
+        userName: req.session.userData?.name ?? studentId + userName,
+        content
+      });
+      if (!duplicate) {
+        const newInquiry = new Inquiry({
+          loggedIn: req.session.userData?.name ? true : false,
+          userName: req.session.userData?.name ?? studentId + userName,
+          content
+        });
+        await newInquiry.save();
+      }
+    }
     res.redirect('/contact_us');
   } catch (error) {
     console.error(error);

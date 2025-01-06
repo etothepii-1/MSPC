@@ -74,12 +74,18 @@
     </nav>
 
     <main>
-      <div class="container mt-4">
+      <div class="container">
         <form action="/inquiry" method="post">
           <fieldset>
             <div class="form-group">
-              <label for="textarea" class="h3">문의사항</label>
-              <textarea id="textarea" class="form-control mt-2" name="content" rows="10"></textarea>
+              <% if (!loggedIn) { %>
+                <label for="studentId" class="h3 mt-4">학번</label>
+                <input id="studentId" class="form-control mt-2" type="text" name="studentId" placeholder="ex)20105" maxlength="5" required/>
+                <label for="userName" class="h3 mt-4">이름</label>
+                <input id="userName" class="form-control mt-2" type="text" name="userName" maxlength="3" required />
+              <% } %>
+              <label for="textarea" class="h3 mt-4">문의사항</label>
+              <textarea id="textarea" class="form-control mt-2" name="content" rows="10" maxlength="10000" required></textarea>
             </div>
             <input id="submit-btn" class="btn btn-dark mt-4" type="submit" value="제출" />
           </fieldset>
@@ -95,7 +101,9 @@
     <script src="/scripts/global.js"></script>
     <script>
       document.getElementById('submit-btn').addEventListener('click', function () {
-        alert('제출 완료');
+        if (document.getElementById('textarea').value) {
+          alert('제출 완료');
+        }
       });
     </script>
   </body>

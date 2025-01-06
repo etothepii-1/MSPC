@@ -26,6 +26,10 @@ body {
   background-color: black;
 }
 
+.form-control::-webkit-scrollbar-button:vertical:start:decrement {
+  display: none;
+}
+
 .g_id_signin {
   height: 40px;
   width: 182px;
