@@ -76,7 +76,7 @@
     <main>
       <div class="container mt-4">
         <table class="table table-hover">
-          <thead class="table-dark">
+          <thead class="table-dark text-nowrap">
             <tr>
               <th scope="col">#</th>
               <th scope="col">아이디</th>
@@ -99,7 +99,7 @@
                 <td><%= user.totalScore %></td>
                 <% const scoreUpdate = new Date(user.scoreUpdate); %>
                 <% scoreUpdate.setHours(scoreUpdate.getHours() + 9); %>
-                <td><%= scoreUpdate.toISOString().replace('T', ' ').slice(0, -1) %></td>
+                <td class="text-nowrap"><%= scoreUpdate.toISOString().replace('T', ' ').slice(0, -5) %></td>
               </tr>
               <% j++; %>
             <% }); %>
