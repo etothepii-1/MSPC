@@ -325,32 +325,42 @@ app.get('/contact_us', (req, res) => {
 });
 
 const inquirySchema = new mongoose.Schema({
+  date: Date,
   loggedIn: Boolean,
   userName: String,
   content: String,
+  valid: Boolean,
 });
 const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 app.post('/inquiry', async (req, res) => {
   try {
     const { studentId, userName, content } = req.body;
-    const studentIdRegex = /^[1-3](0[1-9]|10)(0[1-9]|[12][0-9]|30)$/;
-    const userNameRegex = /^[가-힣]{2,3}$/;
-    if ((studentIdRegex.test(studentId) && userNameRegex.test(userName)) || (studentId === undefined && userName === undefined)) {
+    const loggedIn = req.session.userData ? true : false;
+    let valid = true;
+    if(!loggedIn) {
+      const studentIdRegex = /^[1-3](0[1-9]|10)(0[1-9]|[12][0-9]|30)$/;
+      const userNameRegex = /^[가-힣]{2,3}$/;
+      valid = studentIdRegex.test(studentId) && userNameRegex.test(userName);
+    }
+    if (valid) {
       const duplicate = await Inquiry.findOne({
-        loggedIn: req.session.userData?.name ? true : false,
+        loggedIn,
         userName: req.session.userData?.name ?? studentId + userName,
-        content
+        content,
       });
-      if (!duplicate) {
-        const newInquiry = new Inquiry({
-          loggedIn: req.session.userData?.name ? true : false,
-          userName: req.session.userData?.name ?? studentId + userName,
-          content
-        });
-        await newInquiry.save();
+      if (duplicate) {
+        valid = false;
       }
     }
+    const newInquiry = new Inquiry({
+      date: new Date(),
+      loggedIn,
+      userName: req.session.userData?.name ?? studentId + userName,
+      content,
+      valid,
+    });
+    await newInquiry.save();
     res.redirect('/contact_us');
   } catch (error) {
     console.error(error);

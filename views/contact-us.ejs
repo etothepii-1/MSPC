@@ -80,9 +80,9 @@
             <div class="form-group">
               <% if (!loggedIn) { %>
                 <label for="studentId" class="h3 mt-4">학번</label>
-                <input id="studentId" class="form-control mt-2" type="text" name="studentId" placeholder="ex)20105" maxlength="5" required/>
+                <input id="studentId" class="form-control mt-2" type="text" name="studentId" placeholder="ex)20105"  minlength="5" maxlength="5" required/>
                 <label for="userName" class="h3 mt-4">이름</label>
-                <input id="userName" class="form-control mt-2" type="text" name="userName" maxlength="3" required />
+                <input id="userName" class="form-control mt-2" type="text" name="userName"  minlength="2" maxlength="3" required />
               <% } %>
               <label for="textarea" class="h3 mt-4">문의사항</label>
               <textarea id="textarea" class="form-control mt-2" name="content" rows="10" maxlength="10000" required></textarea>
@@ -101,7 +101,14 @@
     <script src="/scripts/global.js"></script>
     <script>
       document.getElementById('submit-btn').addEventListener('click', function () {
-        if (document.getElementById('textarea').value) {
+        const contentLength = document.getElementById('textarea').value.length;
+        <% if (!loggedIn) { %>
+          const studentIdLength = document.getElementById('studentId').value.length;
+          const userNameLength = document.getElementById('userName').value.length;
+          if (studentIdLength === 5 && (userNameLength === 2 || userNameLength === 3) && (contentLength > 0 && contentLength <= 10000)) {
+        <% } else { %>
+          if (contentLength > 0 && contentLength <= 10000) {
+        <% } %>
           alert('제출 완료');
         }
       });
