@@ -103,11 +103,11 @@
       document.getElementById('submit-btn').addEventListener('click', function () {
         const contentLength = document.getElementById('textarea').value.length;
         <% if (!loggedIn) { %>
-          const studentIdLength = document.getElementById('studentId').value.length;
-          const userNameLength = document.getElementById('userName').value.length;
-          if (studentIdLength === 5 && (userNameLength === 2 || userNameLength === 3) && (contentLength > 0 && contentLength <= 10000)) {
+        const studentIdLength = document.getElementById('studentId').value.length;
+        const userNameLength = document.getElementById('userName').value.length;
+        if (studentIdLength === 5 && (userNameLength === 2 || userNameLength === 3) && (contentLength > 0 && contentLength <= 10000)) {
         <% } else { %>
-          if (contentLength > 0 && contentLength <= 10000) {
+        if (contentLength > 0 && contentLength <= 10000) {
         <% } %>
           alert('제출 완료');
         }

@@ -108,6 +108,26 @@
       crossorigin="anonymous"
     ></script>
     <script src="/scripts/global.js"></script>
-    <script src="/scripts/settings.js"></script>
+    <script>
+      const id = document.getElementById('id');
+      const changeIdBtn = document.getElementById('change-id-btn');
+      id.addEventListener('input', () => {
+        if (id.value === '<%= userId %>') {
+          changeIdBtn.classList.add('disabled');
+        } else {
+          changeIdBtn.classList.remove('disabled');
+        }
+      });
+
+      const language = document.getElementById('language');
+      const changeLanguageBtn = document.getElementById('change-language-btn');
+      language.addEventListener('change', () => {
+        if (language.value === '<%= userLanguage %>') {
+          changeLanguageBtn.classList.add('disabled');
+        } else {
+          changeLanguageBtn.classList.remove('disabled');
+        }
+      });
+    </script>
   </body>
 </html>

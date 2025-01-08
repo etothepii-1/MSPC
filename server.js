@@ -386,7 +386,7 @@ app.post('/change-id', async (req, res) => {
     const { id } = req.body;
     await User.findOneAndUpdate({ sub: req.session.userData.sub }, { id }, { new: true });
     req.session.userData.id = id;
-    res.end();
+    res.redirect('/settings');
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -398,7 +398,7 @@ app.post('/change-language', async (req, res) => {
     const { language } = req.body;
     await User.findOneAndUpdate({ sub: req.session.userData.sub }, { language }, { new: true });
     req.session.userData.language = language;
-    res.end();
+    res.redirect('/settings');
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
