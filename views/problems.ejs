@@ -39,10 +39,10 @@
                 <a href="/problems/<%= problem.id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                   <h5 class="col-8 my-1"><%- `${problem.id}.&ensp;${problem.title}` %></h5>
                   <div class="progress col-4" style="height: 30px">
-                    <% const userProblemScoreMap = new Map(Object.entries(userProblemScore)); %>
-                    <% if (userProblemScoreMap.get(`${problem.id}`)) { %>
-                      <div class="progress-bar bg-dark" style="width: <%= ((userProblemScoreMap.get(`${problem.id}`) ?? 0) / problem.score) * 100 %>%">
-                        <%= userProblemScoreMap.get(`${problem.id}`) ?? 0 %>/<%= problem.score %>
+                    <% const userProblemScoresMap = new Map(Object.entries(userProblemScores)); %>
+                    <% if (userProblemScoresMap.get(`${problem.id}`)) { %>
+                      <div class="progress-bar bg-dark" style="width: <%= ((userProblemScoresMap.get(`${problem.id}`) ?? 0) / problem.score) * 100 %>%">
+                        <%= userProblemScoresMap.get(`${problem.id}`) ?? 0 %>/<%= problem.score %>
                       </div>
                     <% } else { %>
                       /<%= problem.score %>

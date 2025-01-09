@@ -14,20 +14,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+const mongoUrl = process.env.MONGODB_CONNECTION;
 app.use(
   session({
     secret: process.env.SESSION_SECRET_KEY,
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 100 * 365 * 24 * 60 * 60 * 1000 },
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_CONNECTION }),
+    store: MongoStore.create({ mongoUrl }),
   })
 );
 
 app.get('/', (req, res) => {
   try {
     if (req.session.userData) {
-      res.render('index', { loggedIn: true, userId: req.session.userData.id });
+      const userId = req.session.userData.id;
+      res.render('index', { loggedIn: true, userId });
     } else {
       res.render('index', { loggedIn: false });
     }
@@ -68,7 +70,7 @@ app.post('/user-register', async (req, res) => {
       user = await User.findOne({ sub: userSub }, { _id: 0, __v: 0 });
     }
     req.session.userData = user;
-    res.json(req.session.userData);
+    res.end();
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -135,17 +137,23 @@ app.get('/problems', async (req, res) => {
     const startDate = new Date(process.env.START_DATE);
     let problems;
     if (currentDate >= startDate) {
-      problems = await Problem.find({}, { _id: 0, id: 1, title: 1, score: 1 }).sort({ id: 1 });
+      problems = await Problem.find(
+        {},
+        { _id: 0, id: 1, title: 1, score: 1 }
+      ).sort({ id: 1 });
     } else {
       problems = false;
     }
     if (req.session.userData) {
+      const userId = req.session.userData.id;
+      const userTotalScore = req.session.userData.totalScore;
+      const userProblemScores = req.session.userData.problemScore;
       res.render('problems', {
         loggedIn: true,
-        userId: req.session.userData.id,
-        userTotalScore: req.session.userData.totalScore,
+        userId,
+        userTotalScore,
         problems,
-        userProblemScore: req.session.userData.problemScore,
+        userProblemScores,
       });
     } else {
       res.render('problems', { loggedIn: false });
@@ -162,23 +170,28 @@ app.get('/problems/:id', async (req, res) => {
     const startDate = new Date(process.env.START_DATE);
     let problem;
     if (currentDate >= startDate) {
-      problem = await Problem.findOne({ id: req.params.id }, { _id: 0, __v: 0 });
+      const id = req.params.id;
+      problem = await Problem.findOne({ id }, { _id: 0, __v: 0 });
     } else {
       problem = false;
     }
     if (req.session.userData) {
       let userProblemScore;
       try {
-        userProblemScore = new Map(Object.entries(req.session.userData.problemScore)).get(`${problem.id}`) ?? 0;
+        const userProblemScores = req.session.userData.problemScore;
+        const problemScoresMap = new Map(Object.entries(userProblemScores));
+        userProblemScore = problemScoresMap.get(`${problem.id}`) ?? 0;
       } catch {
         userProblemScore = 0;
       }
+      const userId = req.session.userData.id;
+      const userLanguage = req.session.userData.language;
       res.render('problem', {
         loggedIn: true,
-        userId: req.session.userData.id,
+        userId,
         userProblemScore,
         problem,
-        userLanguage: req.session.userData.language,
+        userLanguage,
       });
     } else {
       res.render('problem', { loggedIn: false });
@@ -223,7 +236,8 @@ app.post('/submit', async (req, res) => {
       })),
     };
 
-    const judge0Response = await fetch('http://localhost:2358/submissions/batch', {
+    const baseUrl = process.env.JUDGE0_BASE_URL || 'http://localhost:2358';
+    const judge0Response = await fetch(`${baseUrl}/submissions/batch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -236,7 +250,7 @@ app.post('/submit', async (req, res) => {
       tokens.map(async ({ token }) => {
         let result;
         while (true) {
-          const response = await fetch(`http://localhost:2358/submissions/${token}`);
+          const response = await fetch(`${baseUrl}/submissions/${token}`);
           result = await response.json();
           if (result.hasOwnProperty('error')) {
             return { status: { id: 13 } };
@@ -255,11 +269,26 @@ app.post('/submit', async (req, res) => {
     const currentDate = new Date();
     const endDate = new Date(process.env.END_DATE);
     if (statusId === 3 && scoreIncrease !== 0 && currentDate < endDate) {
-      await User.findOneAndUpdate({ sub: user.sub }, { $inc: { totalScore: scoreIncrease } }, { new: true });
-      await User.findOneAndUpdate({ sub: user.sub }, { $set: { [`problemScore.${problemId}`]: problemScore } }, { new: true });
-      await User.findOneAndUpdate({ sub: user.sub }, { scoreUpdate: new Date() }, { new: true });
+      await User.findOneAndUpdate(
+        { sub: user.sub },
+        { $inc: { totalScore: scoreIncrease } },
+        { new: true }
+      );
+      await User.findOneAndUpdate(
+        { sub: user.sub },
+        { $set: { [`problemScore.${problemId}`]: problemScore } },
+        { new: true }
+      );
+      await User.findOneAndUpdate(
+        { sub: user.sub },
+        { scoreUpdate: new Date() },
+        { new: true }
+      );
     }
-    req.session.userData = await User.findOne({ sub: req.session.userData.sub }, { _id: 0, __v: 0 });
+    req.session.userData = await User.findOne(
+      { sub: user.sub },
+      { _id: 0, __v: 0 }
+    );
     const userName = user.name;
     const submission = new Submission({
       userName,
@@ -285,14 +314,24 @@ app.get('/leaderboard', async (req, res) => {
     });
     let userIndex = -1;
     if (req.session.userData) {
-      userIndex = usersWithSub.findIndex((user) => user.sub === req.session.userData.sub);
+      const userSub = req.session.userData.sub;
+      userIndex = usersWithSub.findIndex((user) => user.sub === userSub);
     }
-    const users = await User.find({ role: { $ne: 'Admin' } }, { _id: 0, id: 1, role: 1, totalScore: 1, scoreUpdate: 1 }).sort({
+    const users = await User.find(
+      { role: { $ne: 'Admin' } },
+      { _id: 0, id: 1, role: 1, totalScore: 1, scoreUpdate: 1 }
+    ).sort({
       totalScore: -1,
       scoreUpdate: 1,
     });
     if (req.session.userData) {
-      res.render('leaderboard', { loggedIn: true, userId: req.session.userData.id, users, userIndex });
+      const userId = req.session.userData.id;
+      res.render('leaderboard', {
+        loggedIn: true,
+        userId,
+        users,
+        userIndex,
+      });
     } else {
       res.render('leaderboard', { loggedIn: false, users, userIndex });
     }
@@ -305,7 +344,8 @@ app.get('/leaderboard', async (req, res) => {
 app.get('/contact_us', (req, res) => {
   try {
     if (req.session.userData) {
-      res.render('contact-us', { loggedIn: true, userId: req.session.userData.id });
+      const userId = req.session.userData.id;
+      res.render('contact-us', { loggedIn: true, userId });
     } else {
       res.render('contact-us', { loggedIn: false });
     }
@@ -334,10 +374,11 @@ app.post('/inquiry', async (req, res) => {
       const userNameRegex = /^[가-힣]{2,3}$/;
       valid = studentIdRegex.test(studentId) && userNameRegex.test(userName);
     }
+    const inquiryUserName = req.session.userData?.name ?? studentId + userName;
     if (valid) {
       const duplicate = await Inquiry.findOne({
         loggedIn,
-        userName: req.session.userData?.name ?? studentId + userName,
+        userName: inquiryUserName,
         content,
       });
       if (duplicate) {
@@ -347,7 +388,7 @@ app.post('/inquiry', async (req, res) => {
     const newInquiry = new Inquiry({
       date: new Date(),
       loggedIn,
-      userName: req.session.userData?.name ?? studentId + userName,
+      userName: inquiryUserName,
       content,
       valid,
     });
@@ -362,7 +403,13 @@ app.post('/inquiry', async (req, res) => {
 app.get('/settings', (req, res) => {
   try {
     if (req.session.userData) {
-      res.render('settings', { loggedIn: true, userId: req.session.userData.id, userLanguage: req.session.userData.language });
+      const userId = req.session.userData.id;
+      const userLanguage = req.session.userData.language;
+      res.render('settings', {
+        loggedIn: true,
+        userId,
+        userLanguage,
+      });
     } else {
       res.render('settings', { loggedIn: false });
     }
@@ -375,7 +422,12 @@ app.get('/settings', (req, res) => {
 app.post('/change-id', async (req, res) => {
   try {
     const { id } = req.body;
-    await User.findOneAndUpdate({ sub: req.session.userData.sub }, { id }, { new: true });
+    const sub = req.session.userData.sub;
+    await User.findOneAndUpdate(
+      { sub },
+      { id },
+      { new: true }
+    );
     req.session.userData.id = id;
     res.redirect('/settings');
   } catch (error) {
@@ -387,7 +439,12 @@ app.post('/change-id', async (req, res) => {
 app.post('/change-language', async (req, res) => {
   try {
     const { language } = req.body;
-    await User.findOneAndUpdate({ sub: req.session.userData.sub }, { language }, { new: true });
+    const sub = req.session.userData.sub;
+    await User.findOneAndUpdate(
+      { sub },
+      { language },
+      { new: true }
+    );
     req.session.userData.language = language;
     res.redirect('/settings');
   } catch (error) {
@@ -407,7 +464,7 @@ process.on('unhandledRejection', (reason, promise) => {
 const PORT = process.env.PORT || 8080;
 const start = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_CONNECTION);
+    await mongoose.connect(mongoUrl);
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Listening on ${PORT}`);
     });
