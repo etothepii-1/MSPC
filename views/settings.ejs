@@ -52,6 +52,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="/scripts/global.js"></script>
+    <% if (loggedIn) { %>
     <script>
       const id = document.getElementById('id');
       const changeIdBtn = document.getElementById('change-id-btn');
@@ -73,5 +74,6 @@
         }
       });
     </script>
+    <% } %>
   </body>
 </html>

@@ -37,15 +37,6 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/get-client-id', (req, res) => {
-  try {
-    res.json({ clientId: process.env.GOOGLE_CLIENT_ID });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 const userSchema = new mongoose.Schema({
   name: String,
   sub: String,
@@ -338,7 +329,7 @@ app.post('/inquiry', async (req, res) => {
     const { studentId, userName, content } = req.body;
     const loggedIn = req.session.userData ? true : false;
     let valid = true;
-    if(!loggedIn) {
+    if (!loggedIn) {
       const studentIdRegex = /^[1-3](0[1-9]|10)(0[1-9]|[12][0-9]|30)$/;
       const userNameRegex = /^[가-힣]{2,3}$/;
       valid = studentIdRegex.test(studentId) && userNameRegex.test(userName);

@@ -22,11 +22,8 @@ async function handleCredentialResponse(response) {
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.querySelector('.g_id_signin')) {
     try {
-      const response = await fetch('/get-client-id');
-      const data = await response.json();
-      const clientId = data.clientId;
       google.accounts.id.initialize({
-        client_id: clientId,
+        client_id: '887468590721-r6pfg3lpeoekjac0bs7bncgfrlkjllqu.apps.googleusercontent.com',
         callback: handleCredentialResponse,
       });
       sessionStorage.removeItem('reloadAttempts');
@@ -38,10 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           location.reload(true);
         }, reloadAttempts * 100);
       } else {
-        alert('탭이나 브라우저를 닫았다가 재접속해주세요. 재접속해도 문제가 계속되면 크롬 브라우저를 사용해주세요.');
-        setTimeout(() => {
-          location.reload(true);
-        }, 1000);
+        alert('브라우저를 닫았다가 재접속해주세요. 문제가 계속되면 크롬 브라우저를 사용해주세요.');
+        sessionStorage.removeItem('reloadAttempts');
       }
     }
     google.accounts.id.renderButton(document.querySelector('.g_id_signin'), {

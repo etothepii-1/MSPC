@@ -12,8 +12,6 @@ PORT=8080
 
 MONGODB_CONNECTION=mongodb+srv://mongodbid:mongodbpassword@mspc.abcde.mongodb.net/data?retryWrites=true&w=majority&appName=MSPC
 
-GOOGLE_CLIENT_ID=012345678910-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com
-
 START_DATE=2024-12-20T00:00:00
 
 END_DATE=2024-12-25T22:00:00
