@@ -15,63 +15,7 @@
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-black sticky-top">
-      <div class="container-xl">
-        <a class="navbar-brand" href="/">
-          <img src="/images/logo.png" width="180" height="40" alt="MSPC Logo" />
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbars"
-          aria-controls="navbars"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-md-end" id="navbars">
-          <ul class="navbar-nav text-nowrap">
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/problems">문제 목록</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/leaderboard">리더보드</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/contact_us">문의하기</a>
-            </li>
-            <% if (loggedIn) { %>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown" aria-expanded="false"><%= userId %></a>
-                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                  <li><a class="dropdown-item black" href="/settings">설정</a></li>
-                  <li><a class="dropdown-item red text-danger" id="logout-btn" href="#">로그아웃</a></li>
-                </ul>
-              </li>
-            <% } else { %>
-              <li class="nav-item g_id_signin">
-                <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
-                <div
-                  class="g_id_signin"
-                  data-type="standard"
-                  data-shape="rectangular"
-                  data-theme="filled_black"
-                  data-text="signin_with"
-                  data-size="large"
-                  data-logo_alignment="left"
-                  data-width="40"
-                ></div>
-              </li>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('navbar', { page: 'settings' }) %>
 
     <main>
       <div class="container">
@@ -84,15 +28,15 @@
           <form id="change-language-form" action="/change-language" method="post">
             <label for="language" class="mt-5 h3">기본 언어 변경</label>
             <select id="language" name="language" class="form-select mt-2">
-              <option value="c" <%= userLanguage === 'c' ? 'selected' : '' %>>C (GCC 8.3.0)</option>
-              <option value="cpp" <%= userLanguage === 'cpp' ? 'selected' : '' %>>C++ (GCC 8.3.0)</option>
-              <option value="python" <%= userLanguage === 'python' ? 'selected' : '' %>>Python (3.8.1)</option>
-              <option value="java" <%= userLanguage === 'java' ? 'selected' : '' %>>Java (OpenJDK 13.0.1)</option>
-              <option value="rust" <%= userLanguage === 'rust' ? 'selected' : '' %>>Rust (1.40.0)</option>
-              <option value="go" <%= userLanguage === 'go' ? 'selected' : '' %>>Go (1.13.5)</option>
-              <option value="csharp" <%= userLanguage === 'csharp' ? 'selected' : '' %>>C# (Mono 6.6.0.161)</option>
-              <option value="javascript" <%= userLanguage === 'javascript' ? 'selected' : '' %>>JavaScript (Node.js 12.14.0)</option>
-              <option value="ruby" <%= userLanguage === 'ruby' ? 'selected' : '' %>>Ruby (2.7.0)</option>
+              <option value="c"<%= userLanguage === 'c' ? ' selected' : '' %>>C (GCC 8.3.0)</option>
+              <option value="cpp"<%= userLanguage === 'cpp' ? ' selected' : '' %>>C++ (GCC 8.3.0)</option>
+              <option value="python"<%= userLanguage === 'python' ? ' selected' : '' %>>Python (3.8.1)</option>
+              <option value="java"<%= userLanguage === 'java' ? ' selected' : '' %>>Java (OpenJDK 13.0.1)</option>
+              <option value="rust"<%= userLanguage === 'rust' ? ' selected' : '' %>>Rust (1.40.0)</option>
+              <option value="go"<%= userLanguage === 'go' ? ' selected' : '' %>>Go (1.13.5)</option>
+              <option value="csharp"<%= userLanguage === 'csharp' ? ' selected' : '' %>>C# (Mono 6.6.0.161)</option>
+              <option value="javascript"<%= userLanguage === 'javascript' ? ' selected' : '' %>>JavaScript (Node.js 12.14.0)</option>
+              <option value="ruby"<%= userLanguage === 'ruby' ? ' selected' : '' %>>Ruby (2.7.0)</option>
             </select>
             <input class="btn btn-dark mt-3 disabled" id="change-language-btn" type="submit" value="변경" />
           </form>

@@ -15,63 +15,7 @@
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-black sticky-top">
-      <div class="container-xl">
-        <a class="navbar-brand" href="/">
-          <img src="/images/logo.png" width="180" height="40" alt="MSPC Logo" />
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbars"
-          aria-controls="navbars"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-md-end" id="navbars">
-          <ul class="navbar-nav text-nowrap">
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4 active" href="/problems" aria-current="page">문제 목록</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/leaderboard">리더보드</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/contact_us">문의하기</a>
-            </li>
-            <% if (loggedIn) { %>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><%= userId %></a>
-                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                  <li><a class="dropdown-item black" href="/settings">설정</a></li>
-                  <li><a class="dropdown-item red text-danger" id="logout-btn" href="#">로그아웃</a></li>
-                </ul>
-              </li>
-            <% } else { %>
-              <li class="nav-item g_id_signin">
-                <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
-                <div
-                  class="g_id_signin"
-                  data-type="standard"
-                  data-shape="rectangular"
-                  data-theme="filled_black"
-                  data-text="signin_with"
-                  data-size="large"
-                  data-logo_alignment="left"
-                  data-width="40"
-                ></div>
-              </li>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('navbar', { page: 'problems' }) %>
 
     <main>
       <div class="container mb-3">

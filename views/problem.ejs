@@ -23,63 +23,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-black sticky-top">
-      <div class="container-xl">
-        <a class="navbar-brand" href="/">
-          <img src="/images/logo.png" width="180" height="40" alt="MSPC Logo" />
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbars"
-          aria-controls="navbars"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-md-end" id="navbars">
-          <ul class="navbar-nav text-nowrap">
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4 active" href="/problems" aria-current="page">문제 목록</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/leaderboard">리더보드</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link me-4" href="/contact_us">문의하기</a>
-            </li>
-            <% if (loggedIn) { %>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><%= userId %></a>
-                <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                  <li><a class="dropdown-item black" href="/settings">설정</a></li>
-                  <li><a class="dropdown-item red text-danger" id="logout-btn" href="#">로그아웃</a></li>
-                </ul>
-              </li>
-            <% } else { %>
-              <li class="nav-item g_id_signin">
-                <div id="g_id_onload" data-context="signin" data-ux_mode="popup" data-login_uri="mspc.site" data-auto_prompt="false"></div>
-                <div
-                  class="g_id_signin"
-                  data-type="standard"
-                  data-shape="rectangular"
-                  data-theme="filled_black"
-                  data-text="signin_with"
-                  data-size="large"
-                  data-logo_alignment="left"
-                  data-width="40"
-                ></div>
-              </li>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('navbar', { page: 'problem' }) %>
 
     <main>
       <div class="modal fade" id="result-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
@@ -148,15 +92,15 @@
                     <div class="row">
                       <div class="col-8 pe-0">
                         <select id="language" name="language" class="form-select">
-                          <option id="c" value="49" <%= userLanguage === 'c' ? 'selected' : '' %>>C (GCC 8.3.0)</option>
-                          <option id="cpp" value="53" <%= userLanguage === 'cpp' ? 'selected' : '' %>>C++ (GCC 8.3.0)</option>
-                          <option id="python" value="71" <%= userLanguage === 'python' ? 'selected' : '' %>>Python (3.8.1)</option>
-                          <option id="java" value="62" <%= userLanguage === 'java' ? 'selected' : '' %>>Java (OpenJDK 13.0.1)</option>
-                          <option id="rust" value="73" <%= userLanguage === 'rust' ? 'selected' : '' %>>Rust (1.40.0)</option>
-                          <option id="go" value="60" <%= userLanguage === 'go' ? 'selected' : '' %>>Go (1.13.5)</option>
-                          <option id="csharp" value="51" <%= userLanguage === 'csharp' ? 'selected' : '' %>>C# (Mono 6.6.0.161)</option>
-                          <option id="javascript" value="63" <%= userLanguage === 'javascript' ? 'selected' : '' %>>JavaScript (Node.js 12.14.0)</option>
-                          <option id="ruby" value="72" <%= userLanguage === 'ruby' ? 'selected' : '' %>>Ruby (2.7.0)</option>
+                          <option id="c" value="49"<%= userLanguage === 'c' ? ' selected' : '' %>>C (GCC 8.3.0)</option>
+                          <option id="cpp" value="53"<%= userLanguage === 'cpp' ? ' selected' : '' %>>C++ (GCC 8.3.0)</option>
+                          <option id="python" value="71"<%= userLanguage === 'python' ? ' selected' : '' %>>Python (3.8.1)</option>
+                          <option id="java" value="62"<%= userLanguage === 'java' ? ' selected' : '' %>>Java (OpenJDK 13.0.1)</option>
+                          <option id="rust" value="73"<%= userLanguage === 'rust' ? ' selected' : '' %>>Rust (1.40.0)</option>
+                          <option id="go" value="60"<%= userLanguage === 'go' ? ' selected' : '' %>>Go (1.13.5)</option>
+                          <option id="csharp" value="51"<%= userLanguage === 'csharp' ? ' selected' : '' %>>C# (Mono 6.6.0.161)</option>
+                          <option id="javascript" value="63"<%= userLanguage === 'javascript' ? ' selected' : '' %>>JavaScript (Node.js 12.14.0)</option>
+                          <option id="ruby" value="72"<%= userLanguage === 'ruby' ? ' selected' : '' %>>Ruby (2.7.0)</option>
                         </select>
                       </div>
                       <div class="col-4 ps-0">
