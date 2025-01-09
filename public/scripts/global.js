@@ -1,4 +1,4 @@
-async function handleCredentialResponse(response) {
+const handleCredentialResponse = async (response) => {
   const payload = JSON.parse(
     decodeURIComponent(
       atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
@@ -17,7 +17,7 @@ async function handleCredentialResponse(response) {
     body: JSON.stringify({ userName, userSub }),
   });
   location.reload(true);
-}
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.querySelector('.g_id_signin')) {
